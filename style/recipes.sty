@@ -27,9 +27,23 @@
 \newcommand{\ingred}[1]{\item #1}
 \newcommand{\direct}[1]{\item #1}
 
+% === Recipe Title and Info Storage ===
+\newcommand{\recipeTitle}[1]{\def\@recipeTitle{#1}}
+\newcommand{\recipeInfo}[1]{\def\@recipeInfo{#1}}
+
 % === Recipe Layout Container ===
 \NewDocumentEnvironment{Recipe}{ O{3} }{%
 	\clearpage
+	{\centering
+		{\headingfont\Huge\bfseries \@recipeTitle \par}
+		\vspace{0.75em}
+		\noindent\hrule height 1pt
+		\vspace{0.5em}
+		{\@recipeInfo \par}
+		\vspace{0.5em}
+		\noindent\hrule height 2pt
+		\vspace{1.5em}
+	}
 	\begin{tcbraster}[
 			raster columns=#1,
 			raster equal height,
