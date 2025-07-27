@@ -91,3 +91,34 @@
 				after upper={\end{dirlist}},
 	#1
 }
+
+% === Optional Note Box ===
+\newtcolorbox{RecipeNote}[1][]{
+	enhanced,
+	colback=gray!5,
+	colframe=gray!30,
+	coltitle=black,
+	fonttitle=\sffamily\bfseries\small,
+	boxrule=0.4pt,
+	top=6mm, bottom=4mm, left=4mm, right=4mm,
+	width=\linewidth,
+	attach boxed title to top left={
+			yshift=-2mm,
+			xshift=4mm
+		},
+	boxed title style={
+			empty,
+		},
+	overlay={
+			\node[
+				anchor=north west,
+				fill=gray!5,
+				text=gray!90,
+				font=\sffamily\bfseries\small,
+				inner sep=2pt,
+				yshift=-0.5mm,
+				xshift=4pt
+			] at (frame.north west) {Note};
+		},
+	#1
+}
