@@ -1,0 +1,79 @@
+\ProvidesPackage{style/recipes}[2025/07/27 v1.1 Recipe styling with checkboxes]
+
+% === Dependencies ===
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{raster}
+\RequirePackage[margin=1in]{geometry}
+\RequirePackage{XCharter}
+\RequirePackage{enumitem}
+\RequirePackage{fontspec}
+\RequirePackage{amssymb}
+\RequirePackage{xparse}
+
+% === Fonts ===
+\newfontfamily\headingfont[
+	Extension = .ttf,
+]{Montserrat-ExtraBold}
+
+% === Todo-style ingredient list using checkboxes ===
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$, leftmargin=*, itemsep=0.4em}
+
+% === Directions list with automatic numbers ===
+\newlist{dirlist}{enumerate}{1}
+\setlist[dirlist]{label=\arabic*., leftmargin=*, itemsep=0.75em}
+
+% === Item Macros ===
+\newcommand{\ingred}[1]{\item #1}
+\newcommand{\direct}[1]{\item #1}
+
+% === Recipe Layout Container ===
+\NewDocumentEnvironment{Recipe}{ O{3} }{%
+	\clearpage
+	\begin{tcbraster}[
+			raster columns=#1,
+			raster equal height,
+			raster column skip=2mm
+		]
+		}{%
+	\end{tcbraster}
+}
+
+% === Box Styling ===
+\tcbset{
+	recipebox/.style={
+			lower separated=false,
+			arc=0.1mm,
+			top=5mm,
+			bottom=5mm,
+			colback=white,
+			colframe=white!20!gray,
+			colbacktitle=white,
+			coltitle=black,
+			fonttitle=\headingfont,
+			enhanced,
+			attach boxed title to top left={yshift=-0.12in,xshift=0.15in},
+			boxed title style={boxrule=0pt, colframe=white},
+		}
+}
+
+% === Recipe Content Boxes ===
+
+% Ingredients: checkbox list (via todolist)
+\newtcolorbox{RecipeIngredients}[1][]{
+	recipebox,
+	title=\uppercase{\large\textbf{ingredients}},
+	before upper={\begin{todolist}},
+				after upper={\end{todolist}},
+	#1
+}
+
+% Directions: numbered list
+\newtcolorbox{RecipeDirections}[1][]{
+	recipebox,
+	raster multicolumn=2,
+	title=\uppercase{\large\textbf{directions}},
+	before upper={\begin{dirlist}},
+				after upper={\end{dirlist}},
+	#1
+}
