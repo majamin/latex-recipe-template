@@ -12,6 +12,7 @@
 
 % === Fonts ===
 \newfontfamily\headingfont[
+	Path = fonts/,
 	Extension = .ttf,
 ]{Montserrat-ExtraBold}
 
@@ -29,14 +30,19 @@
 
 % === Recipe Title and Info Storage ===
 \newcommand{\recipeTitle}[1]{\def\@recipeTitle{#1}}
+\newcommand{\recipeDescription}[1]{\def\@recipeDescription{#1}}
 \newcommand{\recipeInfo}[1]{\def\@recipeInfo{#1}}
+
+\def\@recipeDescription{}
 
 % === Recipe Layout Container ===
 \NewDocumentEnvironment{Recipe}{ O{3} }{%
 	\clearpage
 	{\centering
 		{\headingfont\Huge\bfseries \@recipeTitle \par}
-		\vspace{0.75em}
+		\vspace{0.6em}
+		{\sffamily\small\itshape \@recipeDescription \par}
+		\vspace{1.0em}
 		\noindent\hrule height 1pt
 		\vspace{0.5em}
 		{\@recipeInfo \par}
@@ -93,32 +99,16 @@
 }
 
 % === Optional Note Box ===
-\newtcolorbox{RecipeNote}[1][]{
-	enhanced,
-	colback=gray!5,
-	colframe=gray!30,
-	coltitle=black,
-	fonttitle=\sffamily\bfseries\small,
-	boxrule=0.4pt,
-	top=6mm, bottom=4mm, left=4mm, right=4mm,
-	width=\linewidth,
-	attach boxed title to top left={
-			yshift=-2mm,
-			xshift=4mm
-		},
-	boxed title style={
-			empty,
-		},
-	overlay={
-			\node[
-				anchor=north west,
-				fill=gray!5,
-				text=gray!90,
-				font=\sffamily\bfseries\small,
-				inner sep=2pt,
-				yshift=-0.5mm,
-				xshift=4pt
-			] at (frame.north west) {Note};
-		},
-	#1
+\NewDocumentEnvironment{RecipeNote}{ O{} }{%
+	\par\vspace{1.5em}
+	\noindent
+	\begin{minipage}[t]{0.12\linewidth}
+		\raggedright\sffamily\bfseries\small NOTE
+	\end{minipage}%
+	\hspace{1em}%
+	\begin{minipage}[t]{0.83\linewidth}
+		\itshape
+		}{%
+	\end{minipage}
+	\par\vspace{1.5em}
 }
