@@ -9,6 +9,7 @@
 \RequirePackage{fontspec}
 \RequirePackage{amssymb}
 \RequirePackage{xparse}
+\RequirePackage{array}
 
 % === Fonts ===
 \newfontfamily\headingfont[
@@ -17,15 +18,29 @@
 ]{Montserrat-ExtraBold}
 
 % === Todo-style ingredient list using checkboxes ===
-\newlist{todolist}{itemize}{2}
-\setlist[todolist]{label=$\square$, leftmargin=*, itemsep=0.4em}
+\newlist{inglist}{itemize}{1}
+\setlist[inglist]{label={}, leftmargin=*, itemsep=0.4em, topsep=0pt, parsep=0pt}
 
 % === Directions list with automatic numbers ===
 \newlist{dirlist}{enumerate}{1}
 \setlist[dirlist]{label=\arabic*., leftmargin=*, itemsep=0.75em}
 
 % === Item Macros ===
-\newcommand{\ingred}[1]{\item #1}
+\NewDocumentCommand{\ingred}{ m g }{%
+	\item\leavevmode
+	\begin{tabular}[t]
+		{@{}>{\raggedleft\arraybackslash}p{0.22\linewidth}
+		@{\hspace{1em}}
+		>{\raggedright\arraybackslash}p{0.74\linewidth}@{}}%
+		\IfNoValueTF{#2}{
+			% One-column style: blank left, right-aligned text
+		\mbox{}                                                                               & #1 %
+		}{
+			% Two-column style: amount & ingredient
+		\raisebox{\dimexpr-\height+0.75\ht\strutbox\relax}{\color{black!80}\scshape\small #1} & #2 %
+		}
+	\end{tabular}%
+}
 \newcommand{\direct}[1]{\item #1}
 
 % === Recipe Title and Info Storage ===
@@ -37,7 +52,7 @@
 \def\@recipeDescription{}
 
 % === Recipe Layout Container ===
-\NewDocumentEnvironment{Recipe}{ O{3} }{%
+\NewDocumentEnvironment{Recipe}{ O{13} }{%
 	\clearpage
 	{\centering
 		{\headingfont\Huge\bfseries \@recipeTitle \par}
@@ -83,16 +98,17 @@
 % Ingredients: checkbox list (via todolist)
 \newtcolorbox{RecipeIngredients}[1][]{
 	recipebox,
+	raster multicolumn=5,
 	title=\uppercase{\large\textbf{ingredients}},
-	before upper={\begin{todolist}},
-				after upper={\end{todolist}},
+	before upper={\begin{inglist}},
+				after upper={\end{inglist}},
 	#1
 }
 
 % Directions: numbered list
 \newtcolorbox{RecipeDirections}[1][]{
 	recipebox,
-	raster multicolumn=2,
+	raster multicolumn=8,
 	title=\uppercase{\large\textbf{directions}},
 	before upper={\begin{dirlist}},
 				after upper={\end{dirlist}},
