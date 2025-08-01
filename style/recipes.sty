@@ -3,19 +3,11 @@
 % === Dependencies ===
 \RequirePackage[most]{tcolorbox}
 \tcbuselibrary{raster}
-\RequirePackage[margin=1in]{geometry}
-\RequirePackage{XCharter}
 \RequirePackage{enumitem}
-\RequirePackage{fontspec}
-\RequirePackage{amssymb}
 \RequirePackage{xparse}
 \RequirePackage{array}
 
-% === Fonts ===
-\newfontfamily\headingfont[
-	Path = fonts/,
-	Extension = .ttf,
-]{Montserrat-ExtraBold}
+\providecommand{\headingfont}{\normalfont\bfseries}
 
 % === Todo-style ingredient list using checkboxes ===
 \newlist{inglist}{itemize}{1}
@@ -88,7 +80,10 @@
 			coltitle=black,
 			fonttitle=\headingfont,
 			enhanced,
-			attach boxed title to top left={yshift=-0.12in,xshift=0.15in},
+			attach boxed title to top left={
+					yshift=-\tcboxedtitleheight/2, % <-- tcolorbox supports "/2" here
+					xshift=0.15in
+				},
 			boxed title style={boxrule=0pt, colframe=white},
 		}
 }
@@ -119,10 +114,10 @@
 \NewDocumentEnvironment{RecipeNote}{ O{} }{%
 	\par\vspace{1.5em}
 	\noindent
-	\begin{minipage}[t]{0.12\linewidth}
+	\begin{minipage}[t]{0.1\linewidth}
 		\raggedright\sffamily\bfseries\small NOTE
 	\end{minipage}%
-	\hspace{1em}%
+	\hspace{0.2em}%
 	\begin{minipage}[t]{0.83\linewidth}
 		\itshape
 		}{%
