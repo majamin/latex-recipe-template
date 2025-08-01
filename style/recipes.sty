@@ -18,21 +18,23 @@
 \setlist[dirlist]{label=\arabic*., leftmargin=*, itemsep=0.75em}
 
 % === Item Macros ===
-\NewDocumentCommand{\ingred}{ m g }{%
+% \ingred[<amount>]{<ingredient>}
+\NewDocumentCommand{\ingred}{ o m }{%
 	\item\leavevmode
-	\begin{tabular}[t]
-		{@{}>{\raggedleft\arraybackslash}p{0.22\linewidth}
-		@{\hspace{1em}}
+	\begin{tabular}[t]{@{}%
+		>{\raggedleft\arraybackslash}p{0.22\linewidth}%
+		@{\hspace{1em}}%
 		>{\raggedright\arraybackslash}p{0.74\linewidth}@{}}%
-		\IfNoValueTF{#2}{
-			% One-column style: blank left, right-aligned text
-		\mbox{}                                                                               & #1 %
-		}{
-			% Two-column style: amount & ingredient
+		\IfNoValueTF{#1}{%
+			% No amount: keep left column (blank) so alignment matches
+		\mbox{}                                                                               & #2 %
+		}{%
+			% With amount: amount | ingredient
 		\raisebox{\dimexpr-\height+0.75\ht\strutbox\relax}{\color{black!80}\scshape\small #1} & #2 %
-		}
+		}%
 	\end{tabular}%
 }
+
 \newcommand{\direct}[1]{\item #1}
 
 % === Recipe Title and Info Storage ===
