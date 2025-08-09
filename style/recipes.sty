@@ -1,4 +1,4 @@
-\ProvidesPackage{style/recipes}[2025/08/07 v1.3 Minimalist recipe styling]
+\ProvidesPackage{style/recipes}[2025/08/09 v1.5 Minimalist recipe styling]
 
 % ---------------------------------------------------------------
 % Core packages
@@ -12,6 +12,7 @@
 % Font styling
 % ---------------------------------------------------------------
 \providecommand{\headingfont}{\normalfont\bfseries}
+\newcommand{\AmountStyle}[1]{{\normalfont\color{black!80}\scshape\small #1}}
 
 % ---------------------------------------------------------------
 % List styles
@@ -27,7 +28,7 @@
 	leftmargin=*,
 	align=parleft,
 	before=\raggedright,
-	font={\normalfont\color{black!80}\scshape\small}, % ← add \normalfont
+	font=\AmountStyle,
 	itemsep=.25em,
 }
 
@@ -35,14 +36,13 @@
 \setlist[dirlist]{label=\arabic*.,leftmargin=*,itemsep=.6em}
 
 % Row helpers
-% widths for the one-off equal-split row
 \newlength{\ingredFullW}
 \newlength{\ingredLeftW}
 \newlength{\ingredRightW}
 
 \RequirePackage{xparse}
 \NewDocumentCommand{\ingred}{ s o m }{%
-	\IfBooleanTF{#1}{% ★ starred: equal split (50/50), amount still left, may wrap
+	\IfBooleanTF{#1}{% ★: equal split (50/50)
 		\item[]%
 		\begingroup
 		\setlength{\ingredFullW}{\dimexpr \labelwidth+\labelsep+\linewidth\relax}%
@@ -52,7 +52,7 @@
 		\parbox[t]{\ingredLeftW}{%
 			\raggedright\normalsize\strut
 			\IfNoValueTF{#2}{}{%
-				{\normalfont\color{black!80}\scshape\small #2}% ← same style as normal rows
+				{\AmountStyle{#2}}
 			}%
 		}%
 		\hspace{\ingsep}%
@@ -61,7 +61,7 @@
 		\endgroup
 	}{%
 		% unstarred: unchanged – enumitem applies font={...} above to the label
-		\IfNoValueTF{#2}{\item[] #3}{\item[\mbox{#2}] #3}%
+		\IfNoValueTF{#2}{\item[] #3}{\item[\mbox{\AmountStyle{#2}}] #3}%
 	}%
 }
 
