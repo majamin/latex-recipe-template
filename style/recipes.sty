@@ -1,128 +1,160 @@
-\ProvidesPackage{style/recipes}[2025/08/01 v1.2 Minimalist recipe styling]
+\ProvidesPackage{style/recipes}[2025/08/07 v1.3 Minimalist recipe styling]
 
-% === Dependencies ===
-\RequirePackage[most]{tcolorbox}
-\tcbuselibrary{raster}
-\RequirePackage{enumitem}
-\RequirePackage{xparse}
-\RequirePackage{array}
+% ---------------------------------------------------------------
+% Core packages
+% ---------------------------------------------------------------
+\RequirePackage{calc}
+\RequirePackage{xcolor,enumitem}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,raster}
 
+% ---------------------------------------------------------------
+% Font styling
+% ---------------------------------------------------------------
 \providecommand{\headingfont}{\normalfont\bfseries}
 
-% === Todo-style ingredient list using checkboxes ===
-\newlist{inglist}{itemize}{1}
-\setlist[inglist]{label={}, leftmargin=*, itemsep=0.4em, topsep=0pt, parsep=0pt}
+% ---------------------------------------------------------------
+% List styles
+% ---------------------------------------------------------------
+\newlength{\ingsep}
+\setlength{\ingsep}{0.8em}        % ← adjust this to taste
 
-% === Directions list with automatic numbers ===
-\newlist{dirlist}{enumerate}{1}
-\setlist[dirlist]{label=\arabic*., leftmargin=*, itemsep=0.75em}
-
-% === Item Macros ===
-% \ingred[<amount>]{<ingredient>}
-\NewDocumentCommand{\ingred}{ o m }{%
-	\item\leavevmode
-	\begin{tabular}[t]{@{}%
-		>{\raggedleft\arraybackslash}p{0.22\linewidth}%
-		@{\hspace{1em}}%
-		>{\raggedright\arraybackslash}p{0.74\linewidth}@{}}%
-		\IfNoValueTF{#1}{%
-			% No amount: keep left column (blank) so alignment matches
-		\mbox{}                                                                               & #2 %
-		}{%
-			% With amount: amount | ingredient
-		\raisebox{\dimexpr-\height+0.75\ht\strutbox\relax}{\color{black!80}\scshape\small #1} & #2 %
-		}%
-	\end{tabular}%
+\newlist{inglist}{description}{1}
+\setlist[inglist]{%
+	style=multiline,
+	widest={3 cups},
+	labelsep=\ingsep,
+	leftmargin=*,
+	align=parleft,
+	before=\raggedright,
+	font={\normalfont\color{black!80}\scshape\small}, % ← add \normalfont
+	itemsep=.25em,
 }
 
+\newlist{dirlist}{enumerate}{1}
+\setlist[dirlist]{label=\arabic*.,leftmargin=*,itemsep=.6em}
+
+% Row helpers
+% widths for the one-off equal-split row
+\newlength{\ingredFullW}
+\newlength{\ingredLeftW}
+\newlength{\ingredRightW}
+
+\RequirePackage{xparse}
+\NewDocumentCommand{\ingred}{ s o m }{%
+	\IfBooleanTF{#1}{% ★ starred: equal split (50/50), amount still left, may wrap
+		\item[]%
+		\begingroup
+		\setlength{\ingredFullW}{\dimexpr \labelwidth+\labelsep+\linewidth\relax}%
+		\setlength{\ingredLeftW}{\dimexpr .5\ingredFullW - .5\ingsep\relax}%
+		\setlength{\ingredRightW}{\dimexpr .5\ingredFullW - .5\ingsep\relax}%
+		\noindent\hspace*{-\labelwidth}\hspace*{-\labelsep}%
+		\parbox[t]{\ingredLeftW}{%
+			\raggedright\normalsize\strut
+			\IfNoValueTF{#2}{}{%
+				{\normalfont\color{black!80}\scshape\small #2}% ← same style as normal rows
+			}%
+		}%
+		\hspace{\ingsep}%
+		\parbox[t]{\ingredRightW}{\raggedright\normalsize\strut #3}%
+		\par
+		\endgroup
+	}{%
+		% unstarred: unchanged – enumitem applies font={...} above to the label
+		\IfNoValueTF{#2}{\item[] #3}{\item[\mbox{#2}] #3}%
+	}%
+}
+
+
+\newcommand{\ingredNoQty}[1]{\item[] #1}
 \newcommand{\direct}[1]{\item #1}
 
-% === Recipe Title and Info Storage ===
-\newcommand{\recipeTitle}[1]{\def\@recipeTitle{#1}}
-\newcommand{\recipeDescription}[1]{\def\@recipeDescription{#1}}
-\newcommand{\recipeInfo}[1]{\def\@recipeInfo{#1}}
+% ---------------------------------------------------------------
+% Shared tcolorbox
+% ---------------------------------------------------------------
+\tcbset{
+	recipebox/.style={
+			enhanced,
+			arc=0.1mm,
+			top=5mm,bottom=5mm,
+			colback=white,
+			colframe=black!50,
+			colbacktitle=white,
+			fonttitle=\headingfont,
+			coltitle=black,
+			boxed title style={boxrule=0pt,colframe=white},
+			attach boxed title to top left={
+					yshift=-\tcboxedtitleheight/2,
+					xshift=0.15in
+				},
+			valign=top
+		}
+}
 
-% default empty fallback
-\def\@recipeDescription{}
+% ---------------------------------------------------------------
+% Header macros
+% ---------------------------------------------------------------
+\newcommand{\recipesTitle}{}        % internal storage
+\newcommand{\recipesDesc}{}         %   ”
+\newcommand{\recipesInfo}{}         %   ”
 
-% === Recipe Layout Container ===
+\newcommand{\recipeTitle}[1]{\gdef\recipesTitle{#1}}
+\newcommand{\recipeDescription}[1]{\gdef\recipesDesc{#1}}
+\newcommand{\recipeInfo}[1]{\gdef\recipesInfo{#1}}
+
+% ---------------------------------------------------------------
+% 13-column raster wrapper + header output
+% ---------------------------------------------------------------
 \NewDocumentEnvironment{Recipe}{ O{13} }{%
-	\clearpage
+	% ---------- header ----------
 	{\centering
-		{\headingfont\Huge\bfseries \@recipeTitle \par}
-		\vspace{0.6em}
-		{\sffamily\small\itshape \@recipeDescription \par}
-		\vspace{1.0em}
-		\noindent\hrule height 1pt
-		\vspace{0.5em}
-		{\@recipeInfo \par}
-		\vspace{0.5em}
-		\noindent\hrule height 2pt
-		\vspace{1.5em}
-	}
+			{\headingfont\Huge\leavevmode\recipesTitle\par}\vspace{.6em}%
+			{\sffamily\small\itshape\leavevmode\recipesDesc\par}\vspace{1em}%
+			\noindent\hrule height 1pt\par\vspace{.5em}%
+			{\leavevmode\recipesInfo\par}\vspace{.5em}%
+			\noindent\hrule height 2pt\par\vspace{1.5em}%
+		}%
+	% ---------- 13-column raster ----------
 	\begin{tcbraster}[
-			raster columns=#1,
-			raster equal height,
-			raster column skip=2mm
-		]
+			raster columns = #1,
+			raster column skip = 2mm,
+			raster equal height
+		]%
 		}{%
 	\end{tcbraster}
 }
 
-% === Box Styling ===
-\tcbset{
-	recipebox/.style={
-			lower separated=false,
-			arc=0.1mm,
-			top=5mm,
-			bottom=5mm,
-			colback=white,
-			colframe=black!50,
-			colbacktitle=white,
-			coltitle=black,
-			fonttitle=\headingfont,
-			enhanced,
-			attach boxed title to top left={
-					yshift=-\tcboxedtitleheight/2, % <-- tcolorbox supports "/2" here
-					xshift=0.15in
-				},
-			boxed title style={boxrule=0pt, colframe=white},
-		}
+% ---------------------------------------------------------------
+% Ingredient & Direction boxes
+% ---------------------------------------------------------------
+\NewDocumentEnvironment{RecipeIngredients}{ }{%
+	\begin{tcolorbox}[recipebox,
+			title={\MakeUppercase{\large Ingredients}},raster multicolumn=5]%
+		\begin{inglist}
+			}{%
+		\end{inglist}
+	\end{tcolorbox}\ignorespacesafterend
 }
 
-% === Recipe Content Boxes ===
-
-% Ingredients: checkbox list (via todolist)
-\newtcolorbox{RecipeIngredients}[1][]{
-	recipebox,
-	raster multicolumn=5,
-	title=\uppercase{\large\textbf{ingredients}},
-	before upper={\begin{inglist}},
-				after upper={\end{inglist}},
-	#1
+\NewDocumentEnvironment{RecipeDirections}{ }{%
+	\begin{tcolorbox}[recipebox,
+			title={\MakeUppercase{\large Directions}},raster multicolumn=8]%
+		\begin{dirlist}
+			}{%
+		\end{dirlist}
+	\end{tcolorbox}\ignorespacesafterend
 }
 
-% Directions: numbered list
-\newtcolorbox{RecipeDirections}[1][]{
-	recipebox,
-	raster multicolumn=8,
-	title=\uppercase{\large\textbf{directions}},
-	before upper={\begin{dirlist}},
-				after upper={\end{dirlist}},
-	#1
-}
-
-% === Optional Note Box ===
-\NewDocumentEnvironment{RecipeNote}{ O{} }{%
-	\par\vspace{1.5em}
-	\noindent
+% ---------------------------------------------------------------
+% Optional note box
+% ---------------------------------------------------------------
+\NewDocumentEnvironment{RecipeNote}{ }{%
+	\par\vspace{1.5em}\noindent
 	\begin{minipage}[t]{0.1\linewidth}
 		\raggedright\sffamily\bfseries\small NOTE
 	\end{minipage}%
-	\hspace{0.2em}%
-	\begin{minipage}[t]{0.83\linewidth}
-		\itshape
+	\hspace{0.6em}%   ← was 0.2em; adjust as you like
+	\begin{minipage}[t]{0.8\linewidth}\itshape
 		}{%
-	\end{minipage}
-	\par\vspace{1.5em}
+	\end{minipage}\par\vspace{1.5em}
 }
